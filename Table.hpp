@@ -8,12 +8,13 @@
 class Table
 {
 public:
-	Table(int n);
+	Table(int n, float speed);
 
 private:
 	bool isDinner;
 	TableSetup setup;
 	int amount;
+	float speedRatio;
 
 	std::vector<Fork *> forksV;
 	std::vector<Philosopher *> philosophersV;

@@ -1,6 +1,6 @@
 #include "Table.hpp"
 
-Table::Table(int n) : amount(n)
+Table::Table(int n, float speed) : amount(n), speedRatio(speed)
 {
 	prepareForks();
 	preparePhilosophers();
@@ -20,7 +20,7 @@ void Table::preparePhilosophers()
 	{
 		std::string name = "Philosopher ";
 		name += std::to_string(i);
-		philosophersV.push_back(new Philosopher(i, name, setup, forksV.at(i), forksV.at((i + 1) % amount)));
+		philosophersV.push_back(new Philosopher(i, name, setup, forksV.at(i), forksV.at((i + 1) % amount), speedRatio));
 	}
 }
 

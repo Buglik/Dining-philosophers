@@ -11,7 +11,7 @@
 #include <mutex>
 #include "Random.hpp"
 
-Philosopher::Philosopher(int id, std::string n, TableSetup &s, Fork *l, Fork *r) : id(id), name(n), setup(s), leftFork(l), rightFork(r), progress(0.0f), state(State::thinking), thread(&Philosopher::run, this)
+Philosopher::Philosopher(int id, std::string n, TableSetup &s, Fork *l, Fork *r, float speedRatio) : id(id), name(n), setup(s), leftFork(l), rightFork(r), speedRatio(speedRatio), progress(0.0f), state(State::thinking), thread(&Philosopher::run, this)
 {
 }
 
@@ -58,6 +58,7 @@ void Philosopher::eat()
 void Philosopher::wait()
 {
     int delayCounter = Random().randomInt(100, 150);
+    delayCounter *= speedRatio;
 
     for (int i = 0; i <= delayCounter; i++)
     {
