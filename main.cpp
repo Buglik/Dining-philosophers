@@ -19,10 +19,10 @@ void start()
     std::cout<<"Enter speed ration (default 1)"<<std::endl;
     std::cin>>x;
     
-    Table table(n);
-    // UI ui(table.getPhilosophers(), table, table.getForks());
-    // table.dinnerStart();
-    // while(table.getIsDinner());
+    Table table;
+    UI ui(table.getPhilosophers(), table, table.getForks());
+    table.dinnerStart();
+    while(table.getIsDinner());
 }
 
 int main()

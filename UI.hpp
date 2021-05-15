@@ -10,20 +10,20 @@
 class UI
 {
 public:
-	UI(const std::vector<Philosopher>& philosophers, Table& table, const std::vector<Fork>& forks);
+	UI(const std::array<Philosopher,7>& philosophers, Table& table, const std::array<Fork,7>& forks);
 	~UI();
 
-	const std::vector<Philosopher>& philosophers;
+	const std::array<Philosopher,7>& philosophers;
     Table& table;
-	const std::vector<Fork>& forks;
+	const std::array<Fork,7>& forks;
 	
     std::mutex changeMutex;
     bool ifStart = false;
 
 private:
-    std::vector<OutputCoords> outputCoordsPhil; 
-    std::vector<OutputCoords> outputCoordsChop;
-    std::vector<OutputCoords> outputCoordsHungry; 
+    std::array<OutputCoords,7> outputCoordsPhil; 
+    std::array<OutputCoords,7> outputCoordsChop;
+    std::array<OutputCoords,7> outputCoordsHungry; 
 
     std::unique_ptr<std::thread> refreshThread;
     std::unique_ptr<std::thread> keyboardThread;

@@ -1,30 +1,13 @@
 #include "Table.hpp"
 
 
-Table::Table(int amount) : amount(amount)
-{
-	prepareForks();
-	// preparePhilosophers();
-}
-
-
-void Table::preparePhilosophers()
-{
-	for (size_t i = 0; i < amount; i++)
-	{
-		std::string name = "Philosopher ";
-		name += std::to_string(i);
-		philosophers.push_back(Philosopher(i,name,setup,forks.at(i),forks.at(i%amount)));
-
-	}
-}
-
 void Table::prepareForks()
 {
-	for (size_t i = 0; i < amount; i++)
+	for (size_t i = 0; i < 7; i++)
 	{
-		forks.push_back(Fork(i,i%amount));
+		forksV.push_back(new Fork(i,i%7));
 	}
+	
 }
 
 void Table::dinnerStart()
@@ -39,18 +22,18 @@ void Table::dinnerStop()
     isDinner=false;
 }
 
-const std::vector<Fork> & Table::getForks() {
+const std::array<Fork,7> & Table::getForks() {
 	return forks;
 }
 
 
-	const std::vector<Philosopher> & Table::getPhilosophers() {
-		return philosophers;
-	}
+const std::array<Philosopher,7> & Table::getPhilosophers() {
+	return philosophers;
+}
 
-	const TableSetup &Table::getSetup() {
-		return setup;
-	}
+const TableSetup &Table::getSetup() {
+	return setup;
+}
 
 bool Table::getIsDinner() const
 {

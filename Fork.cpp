@@ -3,6 +3,7 @@
 Fork::Fork(int forkId, int ownerId) :
     id(forkId), owner(ownerId), isDirty(true)
     {}
+    
 
 void Fork::ask(int ownerId)
 {

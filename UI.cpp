@@ -4,7 +4,7 @@
 #include <math.h>
 #include "State.hpp"
 
-UI::UI(const std::vector<Philosopher>& philosophers, Table& table, const std::vector<Fork>& forks) : philosophers(philosophers), table(table), forks(forks)
+UI::UI(const std::array<Philosopher,7>& philosophers, Table& table, const std::array<Fork,7>& forks) : philosophers(philosophers), table(table), forks(forks)
 {
 	initscr();
     keypad(stdscr, TRUE);
@@ -139,9 +139,9 @@ void UI::refreshStatuses()
 
     for (unsigned i = 0; i < forks.size(); i++)
     {        
-        const auto& chopstick = forks.at(i);
+        const auto& fork = forks.at(i);
         std::pair<int, int> coords = outputCoordsChop.at(i).coords;
-        int owner = chopstick.getOwner();
+        int owner = fork.getOwner();
         refreshOwner(stdscr, coords.first, coords.second, i, owner);
     }
     refreshHungryBar(stdscr);
@@ -265,7 +265,7 @@ void UI::refreshOwner(WINDOW *win, int y, int x, unsigned i, int owner)
     init_color(COLOR_CYAN, 200, 700, 900);                   
     init_pair(4, COLOR_WHITE, -1);
     attron(COLOR_PAIR(4)); 
-    std::string finString = "Chopstick number " + std::to_string(i) + " is owned by " + name;
+    std::string finString = "Fork " + std::to_string(i) + " is owned by " + name;
     std::scoped_lock lock(changeMutex);
     mvwprintw(win, y, x, finString.c_str());
 
