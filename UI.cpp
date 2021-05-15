@@ -4,9 +4,9 @@
 #include <math.h>
 #include "State.hpp"
 
-UI::UI(const std::array<Philosopher,7>& philosophers, Table& table, const std::array<Fork,7>& forks) : philosophers(philosophers), table(table), forks(forks)
+UI::UI(std::vector<Philosopher *> &philosophers, Table &table, std::vector<Fork *> &forks) : philosophers(philosophers), table(table), forks(forks)
 {
-	initscr();
+    initscr();
     keypad(stdscr, TRUE);
     curs_set(0);
     cbreak();
@@ -17,64 +17,66 @@ UI::UI(const std::array<Philosopher,7>& philosophers, Table& table, const std::a
     init_pair(2, COLOR_GREEN, -1);
     init_pair(3, COLOR_RED, -1);
 
-	initializeWindow();
-	refreshThread = std::make_unique<std::thread>(&UI::refreshView, this);
-    keyboardThread = std::make_unique<std::thread>(&UI::endVisualisation, this);   
-
+    initializeWindow();
+    refreshThread = std::make_unique<std::thread>(&UI::refreshView, this);
+    keyboardThread = std::make_unique<std::thread>(&UI::endVisualisation, this);
 }
 
 UI::~UI()
 {
-	keyboardThread->join();
-	refreshThread->join();
-	destroyWindow(window);
-	endwin();
+    keyboardThread->join();
+    refreshThread->join();
+    destroyWindow(window);
+    endwin();
 }
 
-void UI::destroyWindow(WINDOW* window)
+void UI::destroyWindow(WINDOW *window)
 {
-	wborder(window, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
-	wrefresh(window);
-	delwin(window);
+    wborder(window, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+    wrefresh(window);
+    delwin(window);
 }
-
 
 void UI::initializeWindow()
 {
-	window = newwin(LINES, COLS, 0, 0);
+    window = newwin(LINES, COLS, 0, 0);
     const std::string centerHeader = "DINING PHILOSOPHERS (CHANDI-MISRA)";
     const std::string rightHeader = "Jakub Pawleniak 248897";
 
     mvprintw(0, COLS - centerHeader.length(), centerHeader.c_str());
-    mvprintw(LINES-1, COLS - rightHeader.length(), rightHeader.c_str());
+    mvprintw(LINES - 1, COLS - rightHeader.length(), rightHeader.c_str());
 
     const std::string warningLine1 = "CLICK [ENTER] TO START";
-    
+
     const int rowIndexw1 = LINES / 2;
-    const int colIndexw1 = (COLS - warningLine1.length()) / 2-1;
+    const int colIndexw1 = (COLS - warningLine1.length()) / 2 - 1;
     mvprintw(rowIndexw1, colIndexw1, warningLine1.c_str());
 
-    while (getch() != 10);
+    while (getch() != 10)
+        ;
 
-    const int rowGap = LINES / (philosophers.size()* 2.5);
+    const int rowGap = LINES / (philosophers.size() * 2.5);
     constexpr int colIndex = 0;
 
     for (size_t i = 0; i < philosophers.size(); i++)
     {
-        const int rowIndex = rowGap * i + 3 ;
-        outputCoordsPhil.at(i) = {{ rowIndex, colIndex +5}};
+        const int rowIndex = rowGap * i + 3;
+        OutputCoords coords = {{rowIndex, colIndex + 5}};
+        outputCoordsPhil.push_back(coords);
     }
 
     for (size_t i = 0; i < forks.size(); i++)
     {
-        const int rowIndex = rowGap * (7+i) + 9 ;
-        outputCoordsChop.at(i)  = {{ rowIndex, colIndex + 5}};
+        const int rowIndex = rowGap * i + 3;
+        OutputCoords coords = {{rowIndex, colIndex + 140}};
+        outputCoordsForks.push_back(coords);
     }
 
     for (size_t i = 0; i < philosophers.size(); i++)
     {
-        const int rowIndex = rowGap * i + 3 ;
-        outputCoordsHungry.at(i) = {{ rowIndex, colIndex + 85 }};
+        const int rowIndex = rowGap * i + 3;
+        OutputCoords coords = {{rowIndex, colIndex + 85}};
+        outputCoordsHungry.push_back(coords);
     }
 
     wrefresh(window);
@@ -85,7 +87,7 @@ void UI::refreshView()
     while (table.getIsDinner())
     {
         clear();
-		refreshStatuses();
+        refreshStatuses();
         wrefresh(window);
         std::this_thread::sleep_for(std::chrono::milliseconds(150));
     }
@@ -93,10 +95,10 @@ void UI::refreshView()
 
 void UI::refreshStatuses()
 {
-    attron(COLOR_PAIR(4)); 
+    attron(COLOR_PAIR(4));
     start_color();
     init_color(COLOR_RED, 500, 0, 0);
-    init_color(COLOR_MAGENTA, 400, 600, 900);                   
+    init_color(COLOR_MAGENTA, 400, 600, 900);
     init_pair(1, COLOR_RED, -1);
     init_pair(2, COLOR_GREEN, -1);
     init_pair(3, COLOR_MAGENTA, -1);
@@ -104,45 +106,45 @@ void UI::refreshStatuses()
     std::string stateHeader = "PHILOSOPHER STATUS:";
     std::string state1Header = "RESOURCE STATUS:";
     std::string stateProgressHeader = "PROGRESS:";
-    std::string starvationHeader = "PHILOSOPHER'S HUNGER IN RELATION TO THE ENTIRE HUNGER:";
+    std::string starvationHeader = "PHILOSOPHER'S HUNGER TO THE ENTIRE HUNGER:";
     std::string starvation1Header = "HUNGRY IN RELATION TO THE THINKING AND EATING:";
     mvwprintw(stdscr, 1, 5, stateHeader.c_str());
-    mvwprintw(stdscr, 14, 5, state1Header.c_str());
-    mvwprintw(stdscr, 14, 73, starvation1Header.c_str());
+    mvwprintw(stdscr, 1, 140, state1Header.c_str());
+    mvwprintw(stdscr, 30, 73, starvation1Header.c_str());
     mvwprintw(stdscr, 1, 42, stateProgressHeader.c_str());
     mvwprintw(stdscr, 1, 80, starvationHeader.c_str());
     for (size_t i = 0; i < philosophers.size(); i++)
-    {        
-        
-        const auto& philosopher = philosophers.at(i);
-        switch (philosopher.getState())
-	    {
-	    case State::hungry:
+    {
+
+        auto &philosopher = philosophers.at(i);
+        switch (philosopher->getState())
+        {
+        case State::hungry:
             hungry[i]++;
             hungryAll++;
-            //attron(COLOR_PAIR(1)); 
-	    	break;
-	    case State::eating:
+            //attron(COLOR_PAIR(1));
+            break;
+        case State::eating:
             notHungryAll++;
-            //attron(COLOR_PAIR(2)); 
-	    	break;
-	    case State::thinking:
+            //attron(COLOR_PAIR(2));
+            break;
+        case State::thinking:
             notHungryAll++;
-            //attron(COLOR_PAIR(3)); 
-	    	break;
-	    }
-        attron(COLOR_PAIR(4)); 
+            //attron(COLOR_PAIR(3));
+            break;
+        }
+        attron(COLOR_PAIR(4));
         std::pair<int, int> coords = outputCoordsPhil.at(i).coords;
-        refreshState(stdscr, coords.first, coords.second, philosopher.getProgress(),philosopher.getName(),philosopher.getStateString());
-
+        refreshState(stdscr, coords.first, coords.second, philosopher->getProgress(), philosopher->getName(), philosopher->getStateString());
     }
 
     for (unsigned i = 0; i < forks.size(); i++)
-    {        
-        const auto& fork = forks.at(i);
-        std::pair<int, int> coords = outputCoordsChop.at(i).coords;
-        int owner = fork.getOwner();
-        refreshOwner(stdscr, coords.first, coords.second, i, owner);
+    {
+        auto &fork = forks.at(i);
+        std::pair<int, int> coords = outputCoordsForks.at(i).coords;
+        int owner = fork->getOwner();
+        std::string ownerName = philosophers.at(owner)->getName();
+        refreshOwner(stdscr, coords.first, coords.second, i, ownerName);
     }
     refreshHungryBar(stdscr);
     refreshHungryBars(stdscr);
@@ -150,64 +152,62 @@ void UI::refreshStatuses()
 
 void UI::refreshHungryBar(WINDOW *win)
 {
-        std::string finString;
-        float result;
-        int barLength = 30;
-        if(notHungryAll!=0 && hungryAll !=0)
-            result =static_cast<float>(hungryAll) / static_cast<float>(notHungryAll);
-        else
-            result = 0;
+    std::string finString;
+    float result;
+    int barLength = 30;
+    if (notHungryAll != 0 && hungryAll != 0)
+        result = static_cast<float>(hungryAll) / static_cast<float>(notHungryAll);
+    else
+        result = 0;
 
-        int lpad = std::round(result * barLength);
-        int rpad = barLength - lpad;
-        result = result * 100;
-        std::string hungryInPercent = std::to_string((int)std::round(result));
+    int lpad = std::round(result * barLength);
+    int rpad = barLength - lpad;
+    result = result * 100;
+    std::string hungryInPercent = std::to_string((int)std::round(result));
 
-        finString = "\t"+hungryInPercent;
-        if(hungryInPercent.size()==3)
-        {
-            finString = finString + "% [";
-        }
-        else if(hungryInPercent.size()==2)
-        {
-            finString = finString + " % [";
-        }
-        else
-        {
-            finString = finString + "  % [";
-        }
+    finString = "\t" + hungryInPercent;
+    if (hungryInPercent.size() == 3)
+    {
+        finString = finString + "% [";
+    }
+    else if (hungryInPercent.size() == 2)
+    {
+        finString = finString + " % [";
+    }
+    else
+    {
+        finString = finString + "  % [";
+    }
 
-        
-        for(int i=0; i<lpad; i++)
-        {
-            finString = finString + "#";
-        }
-        for(int i=0; i<rpad; i++)
-        {
-            finString = finString + " ";
-        }
-        finString = finString + "]";
-;
-        if(result>30)
-            attron(COLOR_PAIR(1)); 
-        else
-            attron(COLOR_PAIR(2)); 
-        std::scoped_lock lock(changeMutex);
-        mvwprintw(win, 19, 75, finString.c_str());
-        refresh();
-
+    for (int i = 0; i < lpad; i++)
+    {
+        finString = finString + "#";
+    }
+    for (int i = 0; i < rpad; i++)
+    {
+        finString = finString + " ";
+    }
+    finString = finString + "]";
+    ;
+    if (result > 30)
+        attron(COLOR_PAIR(1));
+    else
+        attron(COLOR_PAIR(2));
+    std::scoped_lock lock(changeMutex);
+    mvwprintw(win, 31, 75, finString.c_str());
+    refresh();
 }
 void UI::refreshState(WINDOW *win, int y, int x, float progress, std::string name, std::string status)
-{   
+{
     int barLength = 30;
     std::string finString;
     std::string progressInPercent = std::to_string((int)std::round(progress * 100));
     int lpad = std::round(progress * barLength);
     int rpad = barLength - lpad;
-    if(status.compare("hungry") != 0)
+    if (status.compare("hungry") != 0)
     {
-        finString = name + " is " + status + "\t\t"+progressInPercent;
-        if(progressInPercent.size()==2)
+        finString = name + " is " + status + "\t\t" + progressInPercent;
+        if (progressInPercent.size() == 2)
         {
             finString = finString + "% [";
         }
@@ -215,16 +215,16 @@ void UI::refreshState(WINDOW *win, int y, int x, float progress, std::string nam
         {
             finString = finString + " % [";
         }
-        for(int i=0; i<lpad; i++)
+        for (int i = 0; i < lpad; i++)
         {
             finString = finString + "#";
         }
-        for(int i=0; i<rpad; i++)
+        for (int i = 0; i < rpad; i++)
         {
             finString = finString + " ";
         }
         finString = finString + "]";
-    }   
+    }
     else
     {
         finString = name + " is " + status;
@@ -234,38 +234,12 @@ void UI::refreshState(WINDOW *win, int y, int x, float progress, std::string nam
     refresh();
 }
 
-void UI::refreshOwner(WINDOW *win, int y, int x, unsigned i, int owner)
-{   
-
-    std::string name;
-    switch(owner)
-    {
-    case 1:
-        name = "Austin";
-        break;
-    case 2:
-        name = "Barnie";
-        break;
-    case 3:
-        name = "Cedric";
-        break;
-    case 4:
-        name = "Darren";
-        break;
-    case 5:
-        name = "Elijah";
-        break;
-    case 6:
-        name = "Freddy";
-        break;
-    case 7:
-        name = "George";
-        break;
-    }
-    init_color(COLOR_CYAN, 200, 700, 900);                   
+void UI::refreshOwner(WINDOW *win, int y, int x, unsigned i, std::string ownerName)
+{
+    init_color(COLOR_CYAN, 200, 700, 900);
     init_pair(4, COLOR_WHITE, -1);
-    attron(COLOR_PAIR(4)); 
-    std::string finString = "Fork " + std::to_string(i) + " is owned by " + name;
+    attron(COLOR_PAIR(4));
+    std::string finString = "Fork " + std::to_string(i) + " is owned by " + ownerName;
     std::scoped_lock lock(changeMutex);
     mvwprintw(win, y, x, finString.c_str());
 
@@ -273,16 +247,16 @@ void UI::refreshOwner(WINDOW *win, int y, int x, unsigned i, int owner)
 }
 
 void UI::refreshHungryBars(WINDOW *win)
-{         
+{
     init_pair(1, COLOR_RED, -1);
     init_pair(2, COLOR_GREEN, -1);
     float result;
-    std::string finString="";
+    std::string finString = "";
     for (unsigned i = 0; i < philosophers.size(); i++)
-    {        
+    {
         int barLength = 30;
-        if(hungry[i]!=0 && hungryAll !=0)
-            result =static_cast<float>(hungry[i]) / static_cast<float>(hungryAll);
+        if (hungry[i] != 0 && hungryAll != 0)
+            result = static_cast<float>(hungry[i]) / static_cast<float>(hungryAll);
         else
             result = 0;
 
@@ -291,12 +265,12 @@ void UI::refreshHungryBars(WINDOW *win)
         result = result * 100;
         std::string hungryInPercent = std::to_string((int)std::round(result));
 
-        finString = "\t"+hungryInPercent;
-        if(hungryInPercent.size()==3)
+        finString = "\t" + hungryInPercent;
+        if (hungryInPercent.size() == 3)
         {
             finString = finString + "% [";
         }
-        else if(hungryInPercent.size()==2)
+        else if (hungryInPercent.size() == 2)
         {
             finString = finString + " % [";
         }
@@ -304,21 +278,21 @@ void UI::refreshHungryBars(WINDOW *win)
         {
             finString = finString + "  % [";
         }
-        for(int i=0; i<lpad; i++)
+        for (int i = 0; i < lpad; i++)
         {
             finString = finString + "#";
         }
-        for(int i=0; i<rpad; i++)
+        for (int i = 0; i < rpad; i++)
         {
             finString = finString + " ";
         }
         finString = finString + "]";
 
         std::pair<int, int> coords = outputCoordsHungry.at(i).coords;
-        if(result>100/7)
-            attron(COLOR_PAIR(1)); 
+        if (result > 100 / 7)
+            attron(COLOR_PAIR(1));
         else
-            attron(COLOR_PAIR(2)); 
+            attron(COLOR_PAIR(2));
         std::scoped_lock lock(changeMutex);
         mvwprintw(win, coords.first, coords.second, finString.c_str());
         refresh();
@@ -332,9 +306,9 @@ void UI::endVisualisation()
 
         switch (keyPressed)
         {
-            case 27: // ESCAPE KEY
-                table.dinnerStop();
-                break;
+        case 27: // ESCAPE KEY
+            table.dinnerStop();
+            break;
         }
     }
 }

@@ -11,18 +11,19 @@
 #include "UI.hpp"
 
 void start()
-{   
+{
     int n;
-    float x; 
-    std::cout<<"Enter number of philosophers"<<std::endl;
-    std::cin>>n;
-    std::cout<<"Enter speed ration (default 1)"<<std::endl;
-    std::cin>>x;
-    
-    Table table;
+    float x;
+    std::cout << "Enter number of philosophers" << std::endl;
+    std::cin >> n;
+    std::cout << "Enter speed ration (default 1)" << std::endl;
+    std::cin >> x;
+
+    Table table(n);
     UI ui(table.getPhilosophers(), table, table.getForks());
     table.dinnerStart();
-    while(table.getIsDinner());
+    while (table.getIsDinner())
+        ;
 }
 
 int main()

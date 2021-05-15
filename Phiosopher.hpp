@@ -14,15 +14,15 @@ private:
     int id;
     std::string name;
     TableSetup& setup;
-    Fork& leftFork;
-    Fork& rightFork;
+    Fork* leftFork;
+    Fork* rightFork;
     std::thread thread;
     std::atomic<float> progress;
     std::atomic<State> state;
 
 
 public:
-    Philosopher(int id, std::string n, TableSetup & s, Fork & l, Fork & r);
+    Philosopher(int id, std::string n, TableSetup & s, Fork* l, Fork* r);
     ~Philosopher();
 
     void run();
