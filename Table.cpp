@@ -10,7 +10,7 @@ void Table::prepareForks()
 {
 	for (size_t i = 0; i < amount; i++)
 	{
-		forksV.push_back(new Fork(i, i % amount));
+		forksV.push_back(new Fork(i, i));
 	}
 }
 

@@ -106,8 +106,8 @@ void UI::refreshStatuses()
     std::string stateHeader = "PHILOSOPHER STATUS:";
     std::string state1Header = "RESOURCE STATUS:";
     std::string stateProgressHeader = "PROGRESS:";
-    std::string starvationHeader = "PHILOSOPHER'S HUNGER TO THE ENTIRE HUNGER:";
-    std::string starvation1Header = "HUNGRY IN RELATION TO THE THINKING AND EATING:";
+    std::string starvationHeader = "HUNGER TO THE ENTIRE HUNGER:";
+    std::string starvation1Header = "HUNGRY TO THINKING AND EATING:";
     mvwprintw(stdscr, 1, 5, stateHeader.c_str());
     mvwprintw(stdscr, 1, 140, state1Header.c_str());
     mvwprintw(stdscr, 30, 73, starvation1Header.c_str());

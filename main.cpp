@@ -16,7 +16,7 @@ void start()
     float x;
     std::cout << "Enter number of philosophers" << std::endl;
     std::cin >> n;
-    std::cout << "Enter speed ration (default 1)" << std::endl;
+    std::cout << "Enter speed ratio (default 1)" << std::endl;
     std::cin >> x;
 
     Table table(n, x);
