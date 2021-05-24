@@ -3,7 +3,7 @@
 void Talk::wait()
 {
     std::unique_lock<std::mutex> lock(mutex);
-    while(!go)
+    while (!go)
     {
         cv.wait(lock);
     }

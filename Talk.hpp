@@ -6,11 +6,10 @@ class Talk
 {
 private:
     std::mutex mutex;
-    std::condition_variable_any cv;
+    std::condition_variable cv;
     bool go = false;
+
 public:
     void wait();
     void letEveryoneKnow();
 };
-
-

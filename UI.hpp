@@ -21,10 +21,6 @@ public:
     bool ifStart = false;
 
 private:
-    // std::array<OutputCoords, 7> outputCoordsPhil;
-    // std::array<OutputCoords, 7> outputCoordsChop;
-    // std::array<OutputCoords, 7> outputCoordsHungry;
-
     std::vector<OutputCoords> outputCoordsPhil;
     std::vector<OutputCoords> outputCoordsForks;
     std::vector<OutputCoords> outputCoordsHungry;
